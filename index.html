@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personality Test (Quick & Accurate)</title>
+    <title>Personality Test for Her</title>
     <style>
+        /* CSS Styles */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #ffe6e6; /* Soft romantic background */
+            background-color: #ffe6e6;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -23,10 +24,12 @@
             max-width: 600px;
             width: 100%;
             text-align: center;
+            transition: all 0.3s ease;
         }
         h1 { color: #d63384; margin-bottom: 15px; font-size: 24px; }
+        p { color: #666; line-height: 1.6; }
         .question-box { margin-bottom: 25px; min-height: 100px; display: flex; align-items: center; justify-content: center; }
-        .question-text { font-size: 18px; color: #444; line-height: 1.6; font-weight: 500; }
+        .question-text { font-size: 18px; color: #444; font-weight: 500; }
         .options { display: flex; flex-direction: column; gap: 15px; }
         button {
             padding: 15px 20px;
@@ -38,6 +41,7 @@
             transition: all 0.2s ease;
             text-align: left;
             color: #555;
+            width: 100%;
         }
         button:hover {
             border-color: #d63384;
@@ -60,147 +64,192 @@
             transition: width 0.3s ease;
         }
         .type-title { font-size: 48px; color: #d63384; margin: 20px 0; font-weight: 800; }
-        .type-desc { font-size: 16px; color: #666; text-align: left; margin-top: 20px; line-height: 1.6; }
         .btn-start { 
             background-color: #d63384; color: white; border: none; 
             font-weight: bold; text-align: center; width: 100%;
             padding: 15px; border-radius: 12px; font-size: 18px;
         }
-        .btn-start:hover { background-color: #c2185b; }
-        .hidden { display: none; }
+        .btn-start:hover { background-color: #c2185b; color: white; }
+        
+        /* Utility Class to Hide Elements */
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-<div class="container" id="welcome-screen">
-    <h1>မင်းရဲ့ Personality Type ကို ရှာဖွေမယ်</h1>
-    <p style="color: #666; margin-bottom: 30px;">
-        မြန်မြန်ဆန်ဆန်နဲ့ တိကျဖို့အတွက် အကောင်းဆုံး မေးခွန်း (၂၄) ခုကိုပဲ ရွေးထားပါတယ်။<br>
-        (၃ မိနစ်လောက်ပဲ ကြာပါမယ်)
-    </p>
-    <button class="btn-start" onclick="startTest()">စတင်ဖြေဆိုမယ် ❤️</button>
-</div>
-
-<div class="container hidden" id="quiz-screen">
-    <div style="text-align: right; margin-bottom: 5px; color: #aaa; font-size: 12px;">
-        <span id="q-number">1</span> / 24
+    <div class="container" id="welcome-screen">
+        <h1>မင်းရဲ့ Personality Type ကို ရှာဖွေမယ်</h1>
+        <p>
+            မြန်မြန်ဆန်ဆန်နဲ့ တိကျဖို့အတွက် အကောင်းဆုံး မေးခွန်း (၂၄) ခုကိုပဲ ရွေးထားပါတယ်။<br>
+            (၃ မိနစ်လောက်ပဲ ကြာပါမယ်)
+        </p>
+        <button class="btn-start" id="start-btn">စတင်ဖြေဆိုမယ် ❤️</button>
     </div>
-    <div class="progress-bar"><div class="progress" id="progress"></div></div>
-    
-    <div class="question-box">
-        <p class="question-text" id="question">Loading...</p>
-    </div>
-    <div class="options">
-        <button onclick="selectOption('A')" id="btnA">Option A</button>
-        <button onclick="selectOption('B')" id="btnB">Option B</button>
-    </div>
-</div>
 
-<div class="container result-box hidden" id="result-screen">
-    <h1>မင်းရဲ့ ရလဒ်ကတော့...</h1>
-    <div class="type-title" id="mbti-type">----</div>
-    <div class="type-desc" id="mbti-desc"></div>
-    <div style="margin-top: 30px; padding: 15px; background: #fff0f3; border-radius: 10px; font-size: 14px; color: #d63384;">
-        ရလဒ်လေးကို Screenshot ရိုက်ပြီး ကိုကို့ဆီ ပို့လိုက်နော် 📸❤️
-    </div>
-    <button class="btn-start" onclick="location.reload()" style="margin-top:20px;">ပြန်ဖြေမယ်</button>
-</div>
-
-<script>
-    let scores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
-    let currentQuestion = 0;
-
-    // 24 High-Impact Questions (6 per dimension)
-    const questions = [
-        // E vs I
-        { q: "အားလပ်ရက်မှာ အားပြန်ပြည့်ဖို့ ဘာလုပ်မလဲ?", a: "သူငယ်ချင်းတွေနဲ့ အပြင်ထွက်တွေ့မယ်", b: "အိမ်မှာပဲ တစ်ယောက်တည်း အေးဆေးနေမယ်", type: ["E", "I"] },
-        { q: "စကားပြောတဲ့အခါ...", a: "စကားပြောရတာကို ပိုအားသန်တယ်", b: "နားထောင်ရတာကို ပိုအားသန်တယ်", type: ["E", "I"] },
-        { q: "လူအများကြီးနဲ့ တွေ့ဆုံပွဲတွေမှာ...", a: "လူသစ်တွေနဲ့ မိတ်ဖွဲ့ရတာ ပျော်တယ်", b: "ကိုယ့်အသိမိတ်ဆွေတွေနဲ့ပဲ နေချင်တယ်", type: ["E", "I"] },
-        { q: "ပြဿနာတစ်ခုကြုံလာရင်...", a: "သူများကို ချက်ချင်းဖွင့်ပြော တိုင်ပင်တယ်", b: "ကိုယ့်ဘာသာကိုယ် အရင်စဉ်းစားအဖြေရှာတယ်", type: ["E", "I"] },
-        { q: "အာရုံစိုက်လုပ်ကိုင်ရတဲ့အခါ...", a: "လူတွေရှိနေလည်း ကိစ္စမရှိဘူး", b: "တံခါးပိတ်ပြီး တစ်ယောက်တည်းနေမှ အဆင်ပြေတယ်", type: ["E", "I"] },
-        { q: "မင်းဟာ...", a: "လူမှုရေးကိစ္စတွေမှာ ဦးဆောင်ပါဝင်လေ့ရှိတယ်", b: "နောက်ကနေပဲ တိတ်တဆိတ် ကူညီလေ့ရှိတယ်", type: ["E", "I"] },
-
-        // S vs N
-        { q: "အနာဂတ်အကြောင်း တွေးတဲ့အခါ...", a: "ဖြစ်နိုင်ချေရှိတဲ့ လက်တွေ့ကျတာကိုပဲ တွေးတယ်", b: "စိတ်ကူးယဉ်ဆန်တဲ့ အိပ်မက်တွေ မက်လေ့ရှိတယ်", type: ["S", "N"] },
-        { q: "တစ်ခုခုကို လေ့လာရင်...", a: "အသေးစိတ် အချက်အလက် (Details) ကို ကြည့်တယ်", b: "ခြုံငုံသုံးသပ်ချက် (Big Picture) ကို ကြည့်တယ်", type: ["S", "N"] },
-        { q: "မင်းဟာ...", a: "လက်တွေ့သမား (Realist) ပိုဖြစ်တယ်", b: "စိတ်ကူးသမား (Dreamer) ပိုဖြစ်တယ်", type: ["S", "N"] },
-        { q: "ညွှန်ကြားချက်တွေကို...", a: "အဆင့်ဆင့် အတိအကျ လိုက်နာတယ်", b: "အကြမ်းဖျင်းကြည့်ပြီး ကိုယ်ပိုင်နည်းနဲ့ လုပ်တယ်", type: ["S", "N"] },
-        { q: "ရုပ်ရှင်ကြည့်ရင်...", a: "ဇာတ်လမ်းနဲ့ သရုပ်ဆောင်မှုကို ကြည့်တယ်", b: "ဇာတ်လမ်းရဲ့ နောက်ကွယ်က အဓိပ္ပာယ်ကို တွေးတယ်", type: ["S", "N"] },
-        { q: "ဆုံးဖြတ်ချက်ချဖို့...", a: "အတိတ်က အတွေ့အကြုံကို ပြန်ကြည့်တယ်", b: "အနာဂတ်က ဖြစ်နိုင်ချေတွေကို မှန်းဆတယ်", type: ["S", "N"] },
-
-        // T vs F
-        { q: "ဆုံးဖြတ်ချက်ချတဲ့အခါ...", a: "ယုတ္တိ (Logic) ကျကျ စဉ်းစားတယ်", b: "ခံစားချက် (Feeling) ကို ဦးစားပေးတယ်", type: ["T", "F"] },
-        { q: "ရန်ဖြစ်ငြင်းခုံရတဲ့အခါ...", a: "အမှန်တရားက အရေးကြီးတယ်", b: "တစ်ဖက်လူ စိတ်မထိခိုက်ဖို့က အရေးကြီးတယ်", type: ["T", "F"] },
-        { q: "သူငယ်ချင်းက ပြဿနာလာပြောရင်...", a: "အဖြေရှာပေးဖို့ (Solution) ကြိုးစားတယ်", b: "စာနာနားလည်ပေးဖို့ (Empathy) ကြိုးစားတယ်", type: ["T", "F"] },
-        { q: "ဝေဖန်ခံရတဲ့အခါ...", a: "မှန်ရင် ပြင်လိုက်တယ်၊ ဘာမှမဖြစ်ဘူး", b: "စိတ်မကောင်းဖြစ်တယ်၊ ခံစားရတယ်", type: ["T", "F"] },
-        { q: "လူတစ်ယောက်ကို သဘောကျတာက...", a: "သူက ထက်မြက်ပြီး တော်လို့", b: "သူက ကြင်နာတတ်ပြီး နွေးထွေးလို့", type: ["T", "F"] },
-        { q: "အရေးကြီးကိစ္စတွေမှာ...", a: "ဦးနှောက်နဲ့ ဆုံးဖြတ်တာ များတယ်", b: "နှလုံးသားနဲ့ ဆုံးဖြတ်တာ များတယ်", type: ["T", "F"] },
-
-        // J vs P
-        { q: "ခရီးသွားဖို့ ပြင်ဆင်တဲ့အခါ...", a: "အချိန်ဇယားအတိအကျ ဆွဲထားလေ့ရှိတယ်", b: "ရောက်မှ ကြုံသလို သွားဖို့ စိတ်ကူးထားတယ်", type: ["J", "P"] },
-        { q: "အလုပ်လုပ်တဲ့ စတိုင်က...", a: "သတ်မှတ်ရက် မတိုင်ခင် အပြီးဖြတ်တယ်", b: "နောက်ဆုံးမိနစ်မှ အားသွန်ခွန်စိုက် လုပ်တတ်တယ်", type: ["J", "P"] },
-        { q: "မင်းရဲ့ အခန်း/စားပွဲခုံက...", a: "သပ်ရပ်သန့်ရှင်းပြီး စည်းကမ်းရှိတယ်", b: "ပစ္စည်းတွေ ပြန့်ကျဲနေတတ်တယ်", type: ["J", "P"] },
-        { q: "Plan တစ်ခု ပျက်သွားရင်...", a: "စိတ်ညစ်တယ်၊ အစီအစဉ်သစ် ချက်ချင်းပြန်ဆွဲတယ်", b: "အေးဆေးပဲ၊ တခြားနည်းနဲ့ လျှောက်လည်လိုက်မယ်", type: ["J", "P"] },
-        { q: "ရက်ချိန်းတစ်ခု ရှိရင်...", a: "စောစောရောက်အောင် သွားတယ်", b: "အချိန်ကပ်မှ ရောက်တာ (သို့) နောက်ကျတတ်တာ များတယ်", type: ["J", "P"] },
-        { q: "ဆုံးဖြတ်ချက်ချပြီးရင်...", a: "စိတ်အေးသွားတယ်၊ ပြန်မပြင်ချင်တော့ဘူး", b: "ရွေးချယ်စရာ လမ်းသစ်တွေကို ဆက်ကြည့်နေမိတယ်", type: ["J", "P"] }
-    ];
-
-    function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-    }
-
-    function startTest() {
-        document.getElementById('welcome-screen').classList.add('hidden');
-        document.getElementById('quiz-screen').classList.remove('hidden');
-        shuffleArray(questions);
-        showQuestion();
-    }
-
-    function showQuestion() {
-        if (currentQuestion >= questions.length) {
-            showResult();
-            return;
-        }
+    <div class="container hidden" id="quiz-screen">
+        <div style="text-align: right; margin-bottom: 5px; color: #aaa; font-size: 12px;">
+            <span id="q-number">1</span> / 24
+        </div>
+        <div class="progress-bar"><div class="progress" id="progress"></div></div>
         
-        const qData = questions[currentQuestion];
-        document.getElementById('q-number').innerText = currentQuestion + 1;
-        document.getElementById('question').innerText = qData.q;
-        document.getElementById('btnA').innerText = qData.a;
-        document.getElementById('btnB').innerText = qData.b;
+        <div class="question-box">
+            <p class="question-text" id="question">Loading...</p>
+        </div>
+        <div class="options">
+            <button id="btnA">Option A</button>
+            <button id="btnB">Option B</button>
+        </div>
+    </div>
 
-        // Update Progress Bar
-        const percent = ((currentQuestion) / questions.length) * 100;
-        document.getElementById('progress').style.width = percent + "%";
-    }
+    <div class="container hidden" id="result-screen">
+        <h1>မင်းရဲ့ ရလဒ်ကတော့...</h1>
+        <div class="type-title" id="mbti-type">----</div>
+        <div class="type-desc" id="mbti-desc"></div>
+        <div style="margin-top: 30px; padding: 15px; background: #fff0f3; border-radius: 10px; font-size: 14px; color: #d63384;">
+            ရလဒ်လေးကို Screenshot ရိုက်ပြီး ကိုကို့ဆီ ပို့လိုက်နော် 📸❤️
+        </div>
+        <button class="btn-start" onclick="location.reload()" style="margin-top:20px;">ပြန်ဖြေမယ်</button>
+    </div>
 
-    function selectOption(option) {
-        const qData = questions[currentQuestion];
-        if (option === 'A') scores[qData.type[0]]++;
-        else scores[qData.type[1]]++;
-        currentQuestion++;
-        showQuestion();
-    }
+    <script>
+        console.log("Script Loaded Successfully");
 
-    function showResult() {
-        document.getElementById('quiz-screen').classList.add('hidden');
-        document.getElementById('result-screen').classList.remove('hidden');
+        // State Variables
+        let scores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
+        let currentQuestion = 0;
 
-        let type = "";
-        type += scores.E >= scores.I ? "E" : "I";
-        type += scores.S >= scores.N ? "S" : "N";
-        type += scores.T >= scores.F ? "T" : "F";
-        type += scores.J >= scores.P ? "J" : "P";
+        // DOM Elements
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const questionText = document.getElementById('question');
+        const btnA = document.getElementById('btnA');
+        const btnB = document.getElementById('btnB');
+        const qNumber = document.getElementById('q-number');
+        const progressBar = document.getElementById('progress');
 
-        document.getElementById('mbti-type').innerText = type;
-        document.getElementById('mbti-desc').innerHTML = getDesc(type);
-    }
+        // Questions Array
+        const questions = [
+            // E vs I
+            { q: "အားလပ်ရက်မှာ အားပြန်ပြည့်ဖို့ ဘာလုပ်မလဲ?", a: "သူငယ်ချင်းတွေနဲ့ အပြင်ထွက်တွေ့မယ်", b: "အိမ်မှာပဲ တစ်ယောက်တည်း အေးဆေးနေမယ်", type: ["E", "I"] },
+            { q: "စကားပြောတဲ့အခါ...", a: "စကားပြောရတာကို ပိုအားသန်တယ်", b: "နားထောင်ရတာကို ပိုအားသန်တယ်", type: ["E", "I"] },
+            { q: "လူအများကြီးနဲ့ တွေ့ဆုံပွဲတွေမှာ...", a: "လူသစ်တွေနဲ့ မိတ်ဖွဲ့ရတာ ပျော်တယ်", b: "ကိုယ့်အသိမိတ်ဆွေတွေနဲ့ပဲ နေချင်တယ်", type: ["E", "I"] },
+            { q: "ပြဿနာတစ်ခုကြုံလာရင်...", a: "သူများကို ချက်ချင်းဖွင့်ပြော တိုင်ပင်တယ်", b: "ကိုယ့်ဘာသာကိုယ် အရင်စဉ်းစားအဖြေရှာတယ်", type: ["E", "I"] },
+            { q: "အာရုံစိုက်လုပ်ကိုင်ရတဲ့အခါ...", a: "လူတွေရှိနေလည်း ကိစ္စမရှိဘူး", b: "တံခါးပိတ်ပြီး တစ်ယောက်တည်းနေမှ အဆင်ပြေတယ်", type: ["E", "I"] },
+            { q: "မင်းဟာ...", a: "လူမှုရေးကိစ္စတွေမှာ ဦးဆောင်ပါဝင်လေ့ရှိတယ်", b: "နောက်ကနေပဲ တိတ်တဆိတ် ကူညီလေ့ရှိတယ်", type: ["E", "I"] },
 
-    function getDesc(type) {
-        const descriptions = {
-            "INTJ": "<b>Architect (မဟာဗျူဟာသမား)</b><br>ကိုယ့်ကမ္ဘာလေးထဲမှာပဲ နေတတ်ပေမယ့် ဦးနှောက်အရမ်းပြေးတဲ့ သူလေး။",
-            "INTP": "<b>Logician (ယုတ္တိဗေဒပညာရှင်)</b><br>အမြဲတမ်း တွေးခေါ်နေပြီး အသစ်အဆန်းတွေကို စိတ်ဝင်စားတဲ့ သူလေး။",
-            "ENTJ": "<b>Commander (စစ်ဘုရင်မလေး)</b><br>ခေါင်းဆောင်နိုင်စွမ်းရှိပြီး ရည်မှန်းချက်ကြီးတဲ့ သူလေး။",
-            "ENT
+            // S vs N
+            { q: "အနာဂတ်အကြောင်း တွေးတဲ့အခါ...", a: "ဖြစ်နိုင်ချေရှိတဲ့ လက်တွေ့ကျတာကိုပဲ တွေးတယ်", b: "စိတ်ကူးယဉ်ဆန်တဲ့ အိပ်မက်တွေ မက်လေ့ရှိတယ်", type: ["S", "N"] },
+            { q: "တစ်ခုခုကို လေ့လာရင်...", a: "အသေးစိတ် အချက်အလက် (Details) ကို ကြည့်တယ်", b: "ခြုံငုံသုံးသပ်ချက် (Big Picture) ကို ကြည့်တယ်", type: ["S", "N"] },
+            { q: "မင်းဟာ...", a: "လက်တွေ့သမား (Realist) ပိုဖြစ်တယ်", b: "စိတ်ကူးသမား (Dreamer) ပိုဖြစ်တယ်", type: ["S", "N"] },
+            { q: "ညွှန်ကြားချက်တွေကို...", a: "အဆင့်ဆင့် အတိအကျ လိုက်နာတယ်", b: "အကြမ်းဖျင်းကြည့်ပြီး ကိုယ်ပိုင်နည်းနဲ့ လုပ်တယ်", type: ["S", "N"] },
+            { q: "ရုပ်ရှင်ကြည့်ရင်...", a: "ဇာတ်လမ်းနဲ့ သရုပ်ဆောင်မှုကို ကြည့်တယ်", b: "ဇာတ်လမ်းရဲ့ နောက်ကွယ်က အဓိပ္ပာယ်ကို တွေးတယ်", type: ["S", "N"] },
+            { q: "ဆုံးဖြတ်ချက်ချဖို့...", a: "အတိတ်က အတွေ့အကြုံကို ပြန်ကြည့်တယ်", b: "အနာဂတ်က ဖြစ်နိုင်ချေတွေကို မှန်းဆတယ်", type: ["S", "N"] },
+
+            // T vs F
+            { q: "ဆုံးဖြတ်ချက်ချတဲ့အခါ...", a: "ယုတ္တိ (Logic) ကျကျ စဉ်းစားတယ်", b: "ခံစားချက် (Feeling) ကို ဦးစားပေးတယ်", type: ["T", "F"] },
+            { q: "ရန်ဖြစ်ငြင်းခုံရတဲ့အခါ...", a: "အမှန်တရားက အရေးကြီးတယ်", b: "တစ်ဖက်လူ စိတ်မထိခိုက်ဖို့က အရေးကြီးတယ်", type: ["T", "F"] },
+            { q: "သူငယ်ချင်းက ပြဿနာလာပြောရင်...", a: "အဖြေရှာပေးဖို့ (Solution) ကြိုးစားတယ်", b: "စာနာနားလည်ပေးဖို့ (Empathy) ကြိုးစားတယ်", type: ["T", "F"] },
+            { q: "ဝေဖန်ခံရတဲ့အခါ...", a: "မှန်ရင် ပြင်လိုက်တယ်၊ ဘာမှမဖြစ်ဘူး", b: "စိတ်မကောင်းဖြစ်တယ်၊ ခံစားရတယ်", type: ["T", "F"] },
+            { q: "လူတစ်ယောက်ကို သဘောကျတာက...", a: "သူက ထက်မြက်ပြီး တော်လို့", b: "သူက ကြင်နာတတ်ပြီး နွေးထွေးလို့", type: ["T", "F"] },
+            { q: "အရေးကြီးကိစ္စတွေမှာ...", a: "ဦးနှောက်နဲ့ ဆုံးဖြတ်တာ များတယ်", b: "နှလုံးသားနဲ့ ဆုံးဖြတ်တာ များတယ်", type: ["T", "F"] },
+
+            // J vs P
+            { q: "ခရီးသွားဖို့ ပြင်ဆင်တဲ့အခါ...", a: "အချိန်ဇယားအတိအကျ ဆွဲထားလေ့ရှိတယ်", b: "ရောက်မှ ကြုံသလို သွားဖို့ စိတ်ကူးထားတယ်", type: ["J", "P"] },
+            { q: "အလုပ်လုပ်တဲ့ စတိုင်က...", a: "သတ်မှတ်ရက် မတိုင်ခင် အပြီးဖြတ်တယ်", b: "နောက်ဆုံးမိနစ်မှ အားသွန်ခွန်စိုက် လုပ်တတ်တယ်", type: ["J", "P"] },
+            { q: "မင်းရဲ့ အခန်း/စားပွဲခုံက...", a: "သပ်ရပ်သန့်ရှင်းပြီး စည်းကမ်းရှိတယ်", b: "ပစ္စည်းတွေ ပြန့်ကျဲနေတတ်တယ်", type: ["J", "P"] },
+            { q: "Plan တစ်ခု ပျက်သွားရင်...", a: "စိတ်ညစ်တယ်၊ အစီအစဉ်သစ် ချက်ချင်းပြန်ဆွဲတယ်", b: "အေးဆေးပဲ၊ တခြားနည်းနဲ့ လျှောက်လည်လိုက်မယ်", type: ["J", "P"] },
+            { q: "ရက်ချိန်းတစ်ခု ရှိရင်...", a: "စောစောရောက်အောင် သွားတယ်", b: "အချိန်ကပ်မှ ရောက်တာ (သို့) နောက်ကျတတ်တာ များတယ်", type: ["J", "P"] },
+            { q: "ဆုံးဖြတ်ချက်ချပြီးရင်...", a: "စိတ်အေးသွားတယ်၊ ပြန်မပြင်ချင်တော့ဘူး", b: "ရွေးချယ်စရာ လမ်းသစ်တွေကို ဆက်ကြည့်နေမိတယ်", type: ["J", "P"] }
+        ];
+
+        // Shuffle Function
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // --- Event Listeners ---
+        document.getElementById('start-btn').addEventListener('click', function() {
+            console.log("Start Button Clicked");
+            welcomeScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            shuffleArray(questions);
+            showQuestion();
+        });
+
+        btnA.addEventListener('click', () => selectOption('A'));
+        btnB.addEventListener('click', () => selectOption('B'));
+
+        // --- Core Functions ---
+
+        function showQuestion() {
+            if (currentQuestion >= questions.length) {
+                showResult();
+                return;
+            }
+            
+            const qData = questions[currentQuestion];
+            qNumber.innerText = currentQuestion + 1;
+            questionText.innerText = qData.q;
+            btnA.innerText = qData.a;
+            btnB.innerText = qData.b;
+
+            // Update Progress
+            const percent = ((currentQuestion) / questions.length) * 100;
+            progressBar.style.width = percent + "%";
+        }
+
+        function selectOption(option) {
+            const qData = questions[currentQuestion];
+            if (option === 'A') {
+                scores[qData.type[0]]++;
+            } else {
+                scores[qData.type[1]]++;
+            }
+            currentQuestion++;
+            showQuestion();
+        }
+
+        function showResult() {
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+
+            let type = "";
+            type += scores.E >= scores.I ? "E" : "I";
+            type += scores.S >= scores.N ? "S" : "N";
+            type += scores.T >= scores.F ? "T" : "F";
+            type += scores.J >= scores.P ? "J" : "P";
+
+            console.log("Result Type:", type);
+
+            document.getElementById('mbti-type').innerText = type;
+            document.getElementById('mbti-desc').innerHTML = getDesc(type);
+        }
+
+        function getDesc(type) {
+            const descriptions = {
+                "INTJ": "<b>Architect (မဟာဗျူဟာသမား)</b><br>ကိုယ့်ကမ္ဘာလေးထဲမှာပဲ နေတတ်ပေမယ့် ဦးနှောက်အရမ်းပြေးတဲ့ သူလေး။",
+                "INTP": "<b>Logician (ယုတ္တိဗေဒပညာရှင်)</b><br>အမြဲတမ်း တွေးခေါ်နေပြီး အသစ်အဆန်းတွေကို စိတ်ဝင်စားတဲ့ သူလေး။",
+                "ENTJ": "<b>Commander (စစ်ဘုရင်မလေး)</b><br>ခေါင်းဆောင်နိုင်စွမ်းရှိပြီး ရည်မှန်းချက်ကြီးတဲ့ သူလေး။",
+                "ENTP": "<b>Debater (စကားစစ်ထိုးသူ)</b><br>ဉာဏ်ကောင်းပြီး စိန်ခေါ်မှုတွေကို မကြောက်တဲ့ သူလေး။",
+                "INFJ": "<b>Advocate (ရှေ့နေမလေး)</b><br>တိတ်ဆိတ်ပေမယ့် စိတ်ဓာတ်ခွန်အားပြည့်ဝပြီး တန်ဖိုးရှိတဲ့ သူလေး။",
+                "INFP": "<b>Mediator (စေ့စပ်ညှိနှိုင်းသူ)</b><br>စိတ်ထားနူးညံ့ပြီး ကြင်နာတတ်တဲ့ ကဗျာဆရာမလေး။",
+                "ENFJ": "<b>Protagonist (ဇာတ်လိုက်ကျော်)</b><br>လူများကို ဆွဲဆောင်စည်းရုံးနိုင်ပြီး ခေါင်းဆောင်ကောင်း သူလေး။",
+                "ENFP": "<b>Campaigner (လှုံ့ဆော်သူ)</b><br>လွတ်လပ်ပျော်ရွှင်ပြီး တီထွင်ဖန်တီးနိုင်စွမ်း မြင့်မားတဲ့ သူလေး။",
+                "ISTJ": "<b>Logistician (ထောက်ပံ့ပို့ဆောင်သူ)</b><br>ကတိတည်ပြီး တာဝန်ယူစိတ်ရှိတဲ့၊ ယုံကြည်အားထားရတဲ့ သူလေး။",
+                "ISFJ": "<b>Defender (ကာကွယ်စောင့်ရှောက်သူ)</b><br>ချစ်ရတဲ့သူတွေကို အမြဲကာကွယ်ပေးတတ်ပြီး နွေးထွေးတဲ့ သူလေး။",
+                "ESTJ": "<b>Executive (အုပ်ချုပ်သူ)</b><br>အရာရာကို စီမံခန့်ခွဲရာမှာ အလွန်တော်တဲ့ သူလေး။",
+                "ESFJ": "<b>Consul (ကောင်စစ်ဝန်)</b><br>လူမှုရေးကောင်းပြီး သူတပါးကို ကူညီတတ်တဲ့ အသည်းကျော်လေး။",
+                "ISTP": "<b>Virtuoso (လက်မှုပညာရှင်)</b><br>စူးစမ်းလေ့လာလိုစိတ်ရှိပြီး လက်တွေ့သမားလေး။",
+                "ISFP": "<b>Adventurer (စွန့်စားသူ)</b><br>အနုပညာစိတ်ရှိပြီး စိတ်ကူးယဉ်ဆန်တဲ့ ချစ်စရာကောင်းသူလေး။",
+                "ESTP": "<b>Entrepreneur (လုပ်ငန်းရှင်)</b><br>စွမ်းအင်ပြည့်ဝပြီး ထက်မြက်တဲ့ သူလေး။",
+                "ESFP": "<b>Entertainer (ဖျော်ဖြေသူ)</b><br>ဘေးလူတွေကိုပါ ပျော်ရွှင်အောင် လုပ်ပေးနိုင်တဲ့ အပျော်တော်ဆက်လေး။"
+            };
+            return descriptions[type] || "ထူးခြားသော ကိုယ်ရည်ကိုယ်သွေးပိုင်ရှင်။";
+        }
+    </script>
+</body>
+</html>
